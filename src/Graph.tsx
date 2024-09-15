@@ -14,7 +14,7 @@ interface IProps {
  * Perspective library adds load to HTMLElement prototype.
  * This interface acts as a wrapper for Typescript compiler.
  */
-interface PerspectiveViewerElement {
+interface PerspectiveViewerElement extends HTMLElement {
   load: (table: Table) => void,
 }
 
@@ -32,7 +32,7 @@ class Graph extends Component<IProps, {}> {
 
   componentDidMount() {
     // Get element to attach the table from the DOM.
-    const elem: PerspectiveViewerElement = document.getElementsByTagName('perspective-viewer')[0] as unknown as PerspectiveViewerElement;
+    const elem = document.getElementsByTagName('perspective-viewer')[0] as unknown as PerspectiveViewerElement;
 
     const schema = {
       stock: 'string',
@@ -46,14 +46,24 @@ class Graph extends Component<IProps, {}> {
     }
     if (this.table) {
       // Load the `table` in the `<perspective-viewer>` DOM reference.
-
-      // Add more Perspective configurations here.
       elem.load(this.table);
+
+      // Add Perspective configurations
+      elem.setAttribute('view', 'y_line'); // Configure to use line chart
+      elem.setAttribute('column-pivots', '["stock"]');
+      elem.setAttribute('row-pivots', '["timestamp"]');
+      elem.setAttribute('columns', '["top_ask_price"]');
+      elem.setAttribute('aggregates', JSON.stringify({
+        stock: 'distinct count',
+        top_ask_price: 'avg',
+        top_bid_price: 'avg',
+        timestamp: 'distinct count',
+      }));
     }
   }
 
   componentDidUpdate() {
-    // Everytime the data props is updated, insert the data into Perspective table
+    // Every time the data props is updated, insert the data into Perspective table
     if (this.table) {
       // As part of the task, you need to fix the way we update the data props to
       // avoid inserting duplicated entries into Perspective table again.
@@ -71,3 +81,4 @@ class Graph extends Component<IProps, {}> {
 }
 
 export default Graph;
+
